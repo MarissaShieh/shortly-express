@@ -85,18 +85,47 @@ app.get('/signup',
   });
 
 app.post('/signup', (req, res, next) => {
-  // console.log('req', req);
+  console.log('HELLOOOOO');
   var username = req.body.username;
   var password = req.body.password;
+  //check if this user already has an existing username
+  console.log('TYPE OF', typeof users.get({ username: username }));
   users.get({ username: username })
-    .then(() => { res.redirect })
+    //if they do, redirect to the signup page
+    .then((result) => {
+      console.log('IN THE .THEN PART ', result);
+      if (result === undefined) {
+        //create the login
+        users.create({ username, password })
+          .then((result) => {
+            console.log('IN THE second  .THEN PART ', result);
+            res.end();
+            // res.redirect('/');
+          })
+          .catch((error) => { console.log(error) })
+      } else {
+        res.redirect('/login');
+      }
+    })
+    .catch((error) => { console.log(error) });
+});
 
 
 
+app.get('/login',
+  (req, res) => {
+    res.render('login');
+  });
 
+app.post('/login', (req, res, next) => {
+  var username = req.body.username;
+  var password = req.body.password;
+  //check if this user already has an existing username
+  users.get({ username: username })
+    //if they don't, redirect to the signup page
+    .catch(() => { res.redirect('/signup') }) //CHECK BACK IF /SIGNUP OR ../SIGNUP
+  //DO MORE STUFF HERE
 
-
-  users.create({ username, password });
 });
 
 
